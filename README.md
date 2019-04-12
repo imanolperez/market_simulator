@@ -1,2 +1,2 @@
-# market_simulator
-Market simulator
+# Market simulator
+Project with Blanka.

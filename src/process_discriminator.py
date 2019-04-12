@@ -11,7 +11,7 @@ def psi(x, M=4, a=1):
     if x <= M:
         return x
 
-    return M + M ** (1 + a) * (M ** (-a)) / a
+    return M + M ** (1 + a) * (M ** (-a) - x ** (-a)) / a
 
 def norm(x):
     return np.linalg.norm(x)

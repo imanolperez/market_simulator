@@ -53,10 +53,6 @@ def Phi(X, order, normalise=True):
 
     return Lambda * sig
 
-def k(X, Y):
-    return np.dot(X, Y)
-
-
 def T(set1, set2, order, verbose=True, normalise=True):
     m = len(set1)
     n = len(set2)
@@ -83,6 +79,13 @@ def c_alpha(m, alpha):
 def test(set1, set2, order, confidence_level=0.99):
     """Statistical test to determine if two sets of paths come
     from the same distribution.
+
+    The statistical test is based in the following paper:
+    
+    Chevyrev, I. and Oberhauser, H., 2018. Signature moments to
+    characterize laws of stochastic processes. arXiv preprint
+    arXiv:1810.10971.
+
 
     Parameters
     ----------

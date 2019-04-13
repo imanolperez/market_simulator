@@ -22,7 +22,7 @@ def phi(x, order):
     a = x ** 2
     a[0] -= psi(norm(x))
 
-    f = lambda x: np.dot(a, [x ** (2 * m) for m in range(len(a))])
+    f = lambda z: np.dot(a, [z ** (2 * m) for m in range(len(a))])
 
     return brentq(f, 0, 5)
 
@@ -39,13 +39,18 @@ def get_keys(dim, order):
 
     return tuples
 
-def Phi(X, order, normalise=True):
-    sig = tosig.stream2sig(np.array(X), order)
+def Phi(X, order, normalise=True, compute_sigs=True):
+    if compute_sigs:
+        dim = np.shape(X)[1]
+        sig = tosig.stream2sig(np.array(X), order)
+    else:
+        dim = 2
+        sig = np.array(X)
 
     if not normalise:
         return sig
 
-    keys = get_keys(np.shape(X)[1], order)
+    keys = get_keys(dim, order)
 
     phi_x = phi(tuple(sig), order)
 
@@ -53,12 +58,12 @@ def Phi(X, order, normalise=True):
 
     return Lambda * sig
 
-def T(set1, set2, order, verbose=True, normalise=True):
+def T(set1, set2, order, verbose=True, normalise=True, compute_sigs=True):
     m = len(set1)
     n = len(set2)
-
-    X = Parallel(n_jobs=-1)(delayed(Phi)(path, order, normalise) for path in tqdm(set1, desc="Computing signatures of population 1", disable=(not verbose)))
-    Y = Parallel(n_jobs=-1)(delayed(Phi)(path, order, normalise) for path in tqdm(set2, desc="Computing signatures of population 2", disable=(not verbose)))
+    
+    X = Parallel(n_jobs=-1)(delayed(Phi)(path, order, normalise, compute_sigs) for path in tqdm(set1, desc="Computing signatures of population 1", disable=(not verbose)))
+    Y = Parallel(n_jobs=-1)(delayed(Phi)(path, order, normalise, compute_sigs) for path in tqdm(set2, desc="Computing signatures of population 2", disable=(not verbose)))
     
     XX = np.dot(X, np.transpose(X))
     YY = np.dot(Y, np.transpose(Y))
@@ -76,7 +81,7 @@ def c_alpha(m, alpha):
     K = 1.
     return (2 * K / m) * (1 + np.sqrt(-2 * np.log(alpha))) ** 2
 
-def test(set1, set2, order, confidence_level=0.99):
+def test(set1, set2, order, confidence_level=0.99, **kwargs):
     """Statistical test to determine if two sets of paths come
     from the same distribution.
 
@@ -113,7 +118,7 @@ def test(set1, set2, order, confidence_level=0.99):
 
     m = len(set1)
 
-    TU = T(set1, set2, order)
+    TU = T(set1, set2, order, **kwargs)
     c = c_alpha(m, confidence_level)
 
     return TU > c

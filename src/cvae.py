@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import utils
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import tensorflow as tf
 
 class CVAE(object):

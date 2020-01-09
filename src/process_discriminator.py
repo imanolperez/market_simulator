@@ -1,6 +1,6 @@
 import numpy as np
 from esig import tosig
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from scipy.optimize import brentq
 from joblib import Parallel, delayed
 import ast
@@ -61,10 +61,10 @@ def Phi(X, order, normalise=True, compute_sigs=True):
 def T(set1, set2, order, verbose=True, normalise=True, compute_sigs=True):
     m = len(set1)
     n = len(set2)
-    
-    X = Parallel(n_jobs=-1)(delayed(Phi)(path, order, normalise, compute_sigs) for path in tqdm(set1, desc="Computing signatures of population 1", disable=(not verbose)))
-    Y = Parallel(n_jobs=-1)(delayed(Phi)(path, order, normalise, compute_sigs) for path in tqdm(set2, desc="Computing signatures of population 2", disable=(not verbose)))
-    
+
+    X = Parallel(n_jobs=1)(delayed(Phi)(path, order, normalise, compute_sigs) for path in tqdm(set1, desc="Computing signatures of population 1", disable=(not verbose)))
+    Y = Parallel(n_jobs=1)(delayed(Phi)(path, order, normalise, compute_sigs) for path in tqdm(set2, desc="Computing signatures of population 2", disable=(not verbose)))
+
     XX = np.dot(X, np.transpose(X))
     YY = np.dot(Y, np.transpose(Y))
     XY = np.dot(X, np.transpose(Y))
@@ -73,12 +73,13 @@ def T(set1, set2, order, verbose=True, normalise=True, compute_sigs=True):
     TU += XX.sum() / (m * m)
     TU += YY.sum() / (n * n)
     TU -= 2 * XY.sum() / (m * n)
-    
+
 
     return TU
 
 def c_alpha(m, alpha):
     K = 1.
+    return 4 * np.sqrt(-np.log(alpha) / m)
     return (2 * K / m) * (1 + np.sqrt(-2 * np.log(alpha))) ** 2
 
 def test(set1, set2, order, confidence_level=0.99, **kwargs):
@@ -86,7 +87,7 @@ def test(set1, set2, order, confidence_level=0.99, **kwargs):
     from the same distribution.
 
     The statistical test is based in the following paper:
-    
+
     Chevyrev, I. and Oberhauser, H., 2018. Signature moments to
     characterize laws of stochastic processes. arXiv preprint
     arXiv:1810.10971.

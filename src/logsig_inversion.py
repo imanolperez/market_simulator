@@ -1,5 +1,5 @@
 import numpy as np
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import copy
 from utils.leadlag import leadlag
 from esig import tosig
